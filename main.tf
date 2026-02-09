@@ -18,7 +18,7 @@ provider "azurerm" {
 # -------- Variables (meilleur que hardcoder) --------
 variable "location" {
   type    = string
-  default = "Canada East"
+  default = "East US"
 }
 
 variable "vm_size" {
@@ -87,6 +87,7 @@ resource "azurerm_network_interface" "nic" {
 }
 
 # -------- VM Linux --------
+
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = "vm-terraform"
   resource_group_name = azurerm_resource_group.rg.name
