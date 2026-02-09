@@ -152,10 +152,5 @@ output "vm_public_ip" {
 output "container_fqdn" {
   value = azurerm_container_group.container.fqdn
 }
-variable "admin_username" {
-  default = "azureuser"
-}
 
-variable "vm_size" {
-  default = "Standard_B1ms"
-}
+
