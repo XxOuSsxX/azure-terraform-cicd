@@ -89,9 +89,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_username = var.admin_username
 
 variable "admin_ssh_public_key" {
-  type      = string
-  sensitive = true
+  type        = string
+  description = "SSH public key for the VM admin user"
 }
+
 
 admin_ssh_key {
   username   = var.admin_username
