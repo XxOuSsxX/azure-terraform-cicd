@@ -1,9 +1,11 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.0"
-    }
+required_providers {
+  azurerm = {
+    source  = "hashicorp/azurerm"
+    version = "~> 3.0"
+  }
+  random = {
+    source  = "hashicorp/random"
+    version = "~> 3.0"
   }
 }
 
@@ -67,4 +69,30 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "22_04-lts"
     version   = "latest"
   }
+}
+
+resource "azurerm_container_group" "container" {
+  name                = "docker-container"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_address_type     = "Public"
+  dns_name_label      = "terraformdocker${random_integer.rand.result}"
+  os_type             = "Linux"
+
+  container {
+    name   = "nginx"
+    image  = "nginx:latest"
+    cpu    = "0.5"
+    memory = "1.5"
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
+}
+
+resource "random_integer" "rand" {
+  min = 10000
+  max = 99999
 }
