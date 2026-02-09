@@ -32,7 +32,10 @@ variable "admin_username" {
   default = "azureuser"
 }
 
-
+variable "admin_ssh_public_key" {
+  type        = string
+  description = "SSH public key for VM access"
+}
 
 # -------- Resource Group --------
 resource "azurerm_resource_group" "rg" {
