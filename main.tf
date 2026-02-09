@@ -17,7 +17,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "rg-terraform-cicd-test-01"
-  location = "Canada Central"
+  location = "Canada East"
 }
 
 resource "azurerm_virtual_network" "vnet" {
