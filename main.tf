@@ -24,7 +24,7 @@ resource "random_integer" "rand" {
 # ---------------- Variables ----------------
 variable "location" {
   type    = string
-  default = "Canada East"
+  default = "Canada Central"
 }
 
 # Mets une taille "courante". Si Azure refuse, on la changera avec une commande rapide.
