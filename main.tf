@@ -30,7 +30,7 @@ variable "location" {
 # Mets une taille "courante". Si Azure refuse, on la changera avec une commande rapide.
 variable "vm_size" {
   type    = string
-  default = "Standard_B1ms"
+  default = "Standard_D1_v2"
 }
 
 variable "admin_username" {
