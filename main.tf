@@ -90,12 +90,17 @@ resource "azurerm_linux_virtual_machine" "vm" {
   size                = var.vm_size
 
   admin_username = var.admin_username
-  admin_password = var.admin_password
-  disable_password_authentication = false
+
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
 
   network_interface_ids = [
     azurerm_network_interface.nic.id
   ]
+
+  disable_password_authentication = true
 
   os_disk {
     caching              = "ReadWrite"
@@ -109,6 +114,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+
 
 # -------- Random pour DNS du container --------
 resource "random_integer" "rand" {
@@ -145,4 +151,11 @@ output "vm_public_ip" {
 
 output "container_fqdn" {
   value = azurerm_container_group.container.fqdn
+}
+variable "admin_username" {
+  default = "azureuser"
+}
+
+variable "vm_size" {
+  default = "Standard_B1ms"
 }
