@@ -28,7 +28,8 @@ variable "location" {
 }
 
 variable "vm_size" {
-  default = "SStandard_B1s"
+  type    = string
+  default = "Standard_B1s" # ✅ corrigé (pas SStandard_...)
 }
 
 variable "admin_username" {
@@ -49,7 +50,7 @@ locals {
   nic_name  = "nic-vm-${random_integer.rand.result}"
   vm_name   = "vm-terraform-${random_integer.rand.result}"
   aci_name  = "docker-container-${random_integer.rand.result}"
-  dns_label = "tfc${random_integer.rand.result}"
+  dns_label = "tfc${random_integer.rand.result}" # ✅ safe pour ACI
 }
 
 # -------- Resource Group --------
@@ -60,7 +61,7 @@ resource "azurerm_resource_group" "rg" {
 
 # -------- VNet / Subnet --------
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-terraform"
+  name                = local.vnet_name
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -74,6 +75,7 @@ resource "azurerm_subnet" "subnet" {
 
   depends_on = [azurerm_virtual_network.vnet]
 }
+
 # -------- Public IP (Standard) --------
 resource "azurerm_public_ip" "pip" {
   name                = local.pip_name
@@ -85,7 +87,7 @@ resource "azurerm_public_ip" "pip" {
 
 # -------- NIC --------
 resource "azurerm_network_interface" "nic" {
-  name                = "nic-vm"
+  name                = local.nic_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -135,20 +137,19 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 # -------- Container (ACI) --------
-
 resource "azurerm_container_group" "container" {
-  name                = "docker-container"
+  name                = local.aci_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_address_type     = "Public"
-  dns_name_label      = "terraformdocker${random_integer.rand.result}"
+  dns_name_label      = local.dns_label
   os_type             = "Linux"
 
   container {
     name   = "nginx"
     image  = "nginx:latest"
-    cpu    = "0.5"
-    memory = "1.5"
+    cpu    = 0.5
+    memory = 1.5
 
     ports {
       port     = 80
@@ -156,7 +157,6 @@ resource "azurerm_container_group" "container" {
     }
   }
 }
-
 
 # -------- Outputs --------
 output "resource_group_name" {
