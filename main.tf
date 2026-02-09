@@ -37,6 +37,8 @@ variable "admin_ssh_public_key" {
   description = "SSH public key for VM access"
 }
 
+
+
 # -------- Resource Group --------
 resource "azurerm_resource_group" "rg" {
   name     = "rg-terraform-cicd-test-01"
@@ -91,10 +93,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_username = var.admin_username
 
-variable "admin_ssh_public_key" {
-  type        = string
-  description = "SSH public key for the VM admin user"
-}
 
 
 admin_ssh_key {
