@@ -29,7 +29,7 @@ variable "location" {
 
 variable "vm_size" {
   type    = string
-  default = "Standard_B1s" # ✅ corrigé (pas SStandard_...)
+  default = "Standard_D2as_v5" # ✅ corrigé (pas SStandard_...)
 }
 
 variable "admin_username" {
