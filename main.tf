@@ -23,8 +23,7 @@ variable "location" {
 
 variable "vm_size" {
   type    = string
-  # Mets une taille plus probable que B2s. Change si Azure refuse.
-  default = "Standard_DS1_v2"
+  default = "Standard_B1ms"
 }
 
 variable "admin_username" {
