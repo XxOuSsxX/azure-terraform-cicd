@@ -130,25 +130,28 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 # -------- Container (ACI) --------
+
 resource "azurerm_container_group" "container" {
-  name                = local.aci_name
+  name                = "docker-container"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_address_type     = "Public"
-  dns_name_label      = local.dns_label
+  dns_name_label      = "terraformdocker${random_integer.rand.result}"
   os_type             = "Linux"
 
- container {
-  name   = "nginx"
-  image  = "nginx:latest"
-  cpu    = 0.5
-  memory = 1.5
+  container {
+    name   = "nginx"
+    image  = "nginx:latest"
+    cpu    = "0.5"
+    memory = "1.5"
 
-  ports {
-    port     = 80
-    protocol = "TCP"
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
   }
 }
+
 
 # -------- Outputs --------
 output "resource_group_name" {
