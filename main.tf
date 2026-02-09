@@ -141,7 +141,7 @@ resource "azurerm_container_group" "container" {
 
   container {
     name   = "nginx"
-    image  = "nginx:latest"
+    image  = "mcr.microsoft.com/oss/nginx/nginx:1.25.4"
     cpu    = "0.5"
     memory = "1.5"
 
