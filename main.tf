@@ -60,7 +60,7 @@ resource "azurerm_resource_group" "rg" {
 
 # -------- VNet / Subnet --------
 resource "azurerm_virtual_network" "vnet" {
-  name                = local.vnet_name
+  name                = "vnet-terraform"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -71,8 +71,9 @@ resource "azurerm_subnet" "subnet" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-}
 
+  depends_on = [azurerm_virtual_network.vnet]
+}
 # -------- Public IP (Standard) --------
 resource "azurerm_public_ip" "pip" {
   name                = local.pip_name
@@ -84,7 +85,7 @@ resource "azurerm_public_ip" "pip" {
 
 # -------- NIC --------
 resource "azurerm_network_interface" "nic" {
-  name                = local.nic_name
+  name                = "nic-vm"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -94,6 +95,11 @@ resource "azurerm_network_interface" "nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.pip.id
   }
+
+  depends_on = [
+    azurerm_subnet.subnet,
+    azurerm_public_ip.pip
+  ]
 }
 
 # -------- VM Linux (SSH) --------
