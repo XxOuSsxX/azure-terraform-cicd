@@ -15,21 +15,22 @@ provider "azurerm" {
   features {}
 }
 
-# -------- Random (évite les conflits de noms) --------
+# ---------------- Random suffix ----------------
 resource "random_integer" "rand" {
   min = 10000
   max = 99999
 }
 
-# -------- Variables --------
+# ---------------- Variables ----------------
 variable "location" {
   type    = string
   default = "Canada East"
 }
 
+# Mets une taille "courante". Si Azure refuse, on la changera avec une commande rapide.
 variable "vm_size" {
   type    = string
-  default = "Standard_D2as_v5" # ✅ corrigé (pas SStandard_...)
+  default = "Standard_B1s"
 }
 
 variable "admin_username" {
@@ -39,44 +40,44 @@ variable "admin_username" {
 
 variable "admin_ssh_public_key" {
   type        = string
-  description = "SSH public key for VM access (ex: ssh-rsa AAAA... user@pc)"
+  description = "SSH public key (ex: ssh-rsa AAAA... user@pc)"
 }
 
-# -------- Noms uniques --------
+# ---------------- Names ----------------
 locals {
-  rg_name   = "rg-terraform-cicd-${random_integer.rand.result}"
-  vnet_name = "vnet-terraform-cicd-${random_integer.rand.result}"
-  pip_name  = "pip-vm-terraform-${random_integer.rand.result}"
-  nic_name  = "nic-vm-${random_integer.rand.result}"
-  vm_name   = "vm-terraform-${random_integer.rand.result}"
-  aci_name  = "docker-container-${random_integer.rand.result}"
-  dns_label = "tfc${random_integer.rand.result}" # ✅ safe pour ACI
+  suffix   = random_integer.rand.result
+  rg_name  = "rg-terraform-cicd-${local.suffix}"
+  vnet     = "vnet-terraform-cicd-${local.suffix}"
+  subnet   = "subnet-01"
+  pip_name = "pip-vm-terraform-${local.suffix}"
+  nic_name = "nic-vm-${local.suffix}"
+  vm_name  = "vm-terraform-${local.suffix}"
+  aci_name = "docker-container-${local.suffix}"
+  dns_lbl  = "tfc${local.suffix}"
 }
 
-# -------- Resource Group --------
+# ---------------- Resource Group ----------------
 resource "azurerm_resource_group" "rg" {
   name     = local.rg_name
   location = var.location
 }
 
-# -------- VNet / Subnet --------
+# ---------------- Network ----------------
 resource "azurerm_virtual_network" "vnet" {
-  name                = local.vnet_name
+  name                = local.vnet
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
 
 resource "azurerm_subnet" "subnet" {
-  name                 = "subnet-01"
+  name                 = local.subnet
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-
-  depends_on = [azurerm_virtual_network.vnet]
 }
 
-# -------- Public IP (Standard) --------
+# Public IP Standard (OK pour quotas Basic)
 resource "azurerm_public_ip" "pip" {
   name                = local.pip_name
   location            = azurerm_resource_group.rg.location
@@ -85,7 +86,6 @@ resource "azurerm_public_ip" "pip" {
   sku                 = "Standard"
 }
 
-# -------- NIC --------
 resource "azurerm_network_interface" "nic" {
   name                = local.nic_name
   location            = azurerm_resource_group.rg.location
@@ -97,14 +97,9 @@ resource "azurerm_network_interface" "nic" {
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.pip.id
   }
-
-  depends_on = [
-    azurerm_subnet.subnet,
-    azurerm_public_ip.pip
-  ]
 }
 
-# -------- VM Linux (SSH) --------
+# ---------------- Linux VM (SSH only) ----------------
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = local.vm_name
   resource_group_name = azurerm_resource_group.rg.name
@@ -119,9 +114,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = var.admin_ssh_public_key
   }
 
-  network_interface_ids = [
-    azurerm_network_interface.nic.id
-  ]
+  network_interface_ids = [azurerm_network_interface.nic.id]
 
   os_disk {
     caching              = "ReadWrite"
@@ -136,13 +129,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 }
 
-# -------- Container (ACI) --------
+# ---------------- Container Instance (ACI) ----------------
 resource "azurerm_container_group" "container" {
   name                = local.aci_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_address_type     = "Public"
-  dns_name_label      = local.dns_label
+  dns_name_label      = local.dns_lbl
   os_type             = "Linux"
 
   container {
@@ -158,7 +151,7 @@ resource "azurerm_container_group" "container" {
   }
 }
 
-# -------- Outputs --------
+# ---------------- Outputs ----------------
 output "resource_group_name" {
   value = azurerm_resource_group.rg.name
 }
