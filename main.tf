@@ -24,11 +24,11 @@ resource "random_integer" "rand" {
 # -------- Variables --------
 variable "location" {
   type    = string
-  default = "canadacentral"
+  default = "Canada East"
 }
 
 variable "vm_size" {
-  default = "Standard_DS1_v2"
+  default = "SStandard_B1s"
 }
 
 variable "admin_username" {
@@ -140,7 +140,7 @@ resource "azurerm_container_group" "container" {
 
   container {
     name   = "nginx"
-    image  = "mcr.microsoft.com/oss/nginx/nginx:1.25.4"
+    image  = "nginx:latest"
     cpu    = "0.5"
     memory = "1.5"
 
