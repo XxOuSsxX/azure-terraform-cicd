@@ -24,12 +24,12 @@ resource "random_integer" "rand" {
 # -------- Variables --------
 variable "location" {
   type    = string
-  default = "East US"
+  default = "canadacentral"
 }
 
 variable "vm_size" {
   type    = string
-  default = "Standard_B2s"
+  default = "Standard_DC16ds_v3"
 }
 
 variable "admin_username" {
