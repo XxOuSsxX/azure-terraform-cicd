@@ -64,9 +64,8 @@ resource "azurerm_public_ip" "pip" {
   name                = "pip-vm-terraform"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-
-  allocation_method = "Static"
-  sku               = "Standard"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 
@@ -140,7 +139,7 @@ resource "azurerm_container_group" "container" {
 
   container {
     name   = "nginx"
-    image  = "nginx:latest"
+    image  = "mcr.microsoft.com/oss/nginx/nginx:1.25.4"
     cpu    = "0.5"
     memory = "1.5"
 
