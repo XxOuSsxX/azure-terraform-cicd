@@ -32,10 +32,7 @@ variable "admin_username" {
   default = "azureuser"
 }
 
-variable "admin_password" {
-  type      = string
-  sensitive = true
-}
+
 
 # -------- Resource Group --------
 resource "azurerm_resource_group" "rg" {
@@ -91,10 +88,15 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_username = var.admin_username
 
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
+variable "admin_ssh_public_key" {
+  type      = string
+  sensitive = true
+}
+
+admin_ssh_key {
+  username   = var.admin_username
+  public_key = var.admin_ssh_public_key
+}
 
   network_interface_ids = [
     azurerm_network_interface.nic.id
