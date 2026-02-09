@@ -15,11 +15,35 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg" {
-  name     = "rg-terraform-cicd-test-01"
-  location = "Canada East"
+# -------- Variables (meilleur que hardcoder) --------
+variable "location" {
+  type    = string
+  default = "Canada East"
 }
 
+variable "vm_size" {
+  type    = string
+  # Mets une taille plus probable que B2s. Change si Azure refuse.
+  default = "Standard_DS1_v2"
+}
+
+variable "admin_username" {
+  type    = string
+  default = "azureuser"
+}
+
+variable "admin_password" {
+  type      = string
+  sensitive = true
+}
+
+# -------- Resource Group --------
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-terraform-cicd-test-01"
+  location = var.location
+}
+
+# -------- VNet / Subnet --------
 resource "azurerm_virtual_network" "vnet" {
   name                = "vnet-terraform-cicd"
   address_space       = ["10.0.0.0/16"]
@@ -34,6 +58,15 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
+# -------- Public IP (utile pour tester la VM) --------
+resource "azurerm_public_ip" "pip" {
+  name                = "pip-vm-terraform"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Dynamic"
+}
+
+# -------- NIC --------
 resource "azurerm_network_interface" "nic" {
   name                = "nic-vm"
   location            = azurerm_resource_group.rg.location
@@ -43,22 +76,26 @@ resource "azurerm_network_interface" "nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.pip.id
   }
+
+  depends_on = [azurerm_subnet.subnet]
 }
 
+# -------- VM Linux --------
 resource "azurerm_linux_virtual_machine" "vm" {
   name                = "vm-terraform"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_B2s"
-  admin_username      = "azureuser"
+  size                = var.vm_size
+
+  admin_username = var.admin_username
+  admin_password = var.admin_password
+  disable_password_authentication = false
 
   network_interface_ids = [
     azurerm_network_interface.nic.id
   ]
-
-  admin_password = "Password1234!"
-  disable_password_authentication = false
 
   os_disk {
     caching              = "ReadWrite"
@@ -73,6 +110,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 }
 
+# -------- Random pour DNS du container --------
+resource "random_integer" "rand" {
+  min = 10000
+  max = 99999
+}
+
+# -------- Container (ACI) --------
 resource "azurerm_container_group" "container" {
   name                = "docker-container"
   location            = azurerm_resource_group.rg.location
@@ -94,7 +138,11 @@ resource "azurerm_container_group" "container" {
   }
 }
 
-resource "random_integer" "rand" {
-  min = 10000
-  max = 99999
+# -------- Outputs (pratique pour ton devoir) --------
+output "vm_public_ip" {
+  value = azurerm_public_ip.pip.ip_address
+}
+
+output "container_fqdn" {
+  value = azurerm_container_group.container.fqdn
 }
