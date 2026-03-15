@@ -1,12 +1,10 @@
-provider "azurerm" {
-  features {}
-}
-
+# Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = "rg-terraform-cicd"
-  location = "Canada Central"
+  location = "Central US"
 }
 
+# Virtual Network
 resource "azurerm_virtual_network" "vnet" {
   name                = "vnet-terraform-cicd"
   location            = azurerm_resource_group.rg.location
@@ -14,6 +12,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
 }
 
+# Subnet
 resource "azurerm_subnet" "subnet" {
   name                 = "subnet-terraform"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -21,6 +20,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
+# Network Interface
 resource "azurerm_network_interface" "nic" {
   name                = "nic-terraform"
   location            = azurerm_resource_group.rg.location
@@ -33,10 +33,11 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 
+# Linux VM
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "VMtest"
+  name                = "vm-terraform-cicd"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = "Central US"
+  location            = azurerm_resource_group.rg.location
   size                = "Standard_D2s_v3"
   admin_username      = "azureuser"
 
@@ -60,8 +61,4 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "server"
     version   = "latest"
   }
-}
-variable "admin_ssh_public_key" {
-  description = "SSH public key for the VM"
-  type        = string
 }
