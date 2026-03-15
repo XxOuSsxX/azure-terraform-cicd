@@ -1,6 +1,3 @@
-provider "azurerm" {
-  features {}
-}
 
 # Resource Group (existant)
 data "azurerm_resource_group" "rg" {
