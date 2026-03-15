@@ -64,22 +64,22 @@ resource "azurerm_linux_virtual_machine" "vm" {
 }
 
 resource "azurerm_container_group" "container" {
-name = "container-terraform"
-location = azurerm_resource_group.rg.location
-resource_group_name = azurerm_resource_group.rg.name
-ip_address_type = "public"
-dns_name_label = "terraform-container-demo"
-os_type = "Linux"
+  name                = "container-terraform"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  ip_address_type     = "public"
+  dns_name_label      = "terraform-nginx-demo"
+  os_type             = "Linux"
 
-container {
-name = "nginx"
-image = "nginx"
-cpu = "1"
-memory = "1.5"
+  container {
+    name   = "nginx"
+    image  = "nginx"
+    cpu    = "1"
+    memory = "1.5"
 
-ports {
-port = 80
-protocol = "TCP"
-}
-}
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+  }
 }
