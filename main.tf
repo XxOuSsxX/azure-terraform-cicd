@@ -20,3 +20,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = var.admin_ssh_public_key
   }
 }
+
+variable "admin_ssh_public_key" {
+  description = "SSH public key for the VM"
+  type        = string
+}
