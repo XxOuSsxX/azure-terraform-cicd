@@ -34,10 +34,10 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "vm-terraform-cicd"
+  name                = "VMtest"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_B1ms"
+  location            = "Central US"
+  size                = "Standard_D2s_v3"
   admin_username      = "azureuser"
 
   network_interface_ids = [
@@ -51,17 +51,16 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "Premium_LRS"
   }
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
     version   = "latest"
   }
 }
-
 variable "admin_ssh_public_key" {
   description = "SSH public key for the VM"
   type        = string
