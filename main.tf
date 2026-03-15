@@ -74,7 +74,7 @@ resource "azurerm_container_group" "container" {
 
   container {
     name   = "nginx"
-    image  = "nginx"
+    image  = "nginx:latest"
     cpu    = "1"
     memory = "1.5"
 
@@ -82,5 +82,10 @@ resource "azurerm_container_group" "container" {
       port     = 80
       protocol = "TCP"
     }
+  }
+
+  exposed_port {
+    port     = 80
+    protocol = "TCP"
   }
 }
