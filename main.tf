@@ -68,7 +68,7 @@ resource "azurerm_container_group" "container" {
   name                = "container-terraform"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
-  ip_address_type     = "public"
+  ip_address_type     = "Public"
   dns_name_label      = "terraform-nginx-demo"
   os_type             = "Linux"
 
