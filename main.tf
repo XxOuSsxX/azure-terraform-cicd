@@ -2,11 +2,13 @@ provider "azurerm" {
   features {}
 }
 
+# Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = "rg-terraform-cicd"
-  location = "Canada Central"
+  location = "Central US"
 }
 
+# Virtual Network
 resource "azurerm_virtual_network" "vnet" {
   name                = "vnet-terraform-cicd"
   location            = azurerm_resource_group.rg.location
@@ -14,6 +16,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = ["10.0.0.0/16"]
 }
 
+# Subnet
 resource "azurerm_subnet" "subnet" {
   name                 = "subnet-terraform"
   resource_group_name  = azurerm_resource_group.rg.name
@@ -21,6 +24,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
+# Network Interface
 resource "azurerm_network_interface" "nic" {
   name                = "nic-terraform"
   location            = azurerm_resource_group.rg.location
@@ -33,11 +37,12 @@ resource "azurerm_network_interface" "nic" {
   }
 }
 
+# Virtual Machine
 resource "azurerm_linux_virtual_machine" "vm" {
-  name                = "vm-terraform-cicd"
+  name                = "VMtest"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_DS1_v2"
+  size                = "Standard_B1ms"
   admin_username      = "azureuser"
 
   network_interface_ids = [
@@ -56,12 +61,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
     version   = "latest"
   }
 }
 
+# Variable SSH
 variable "admin_ssh_public_key" {
   description = "SSH public key for the VM"
   type        = string
